@@ -1,0 +1,35 @@
+---
+- name: Install httpd package
+  package:
+      name: "httpd"
+      state: present
+
+- name: Start httpd
+  service:
+      name: "httpd"
+      state: started
+
+- name: Create document root directory
+  file:
+      state: directory
+      path: "{{ doc_root }}"
+
+- name: Copy conf file to /etc/httpd/conf.d/
+  template:
+      src: "new.conf"
+      dest: "/etc/httpd/conf.d/new.conf"
+  notify: "restart httpd"
+
+- name: Copy content for new webpage
+  copy:
+       content: "HELLO WORLD"
+       dest: "{{ doc_root }}/index.html"
+
+- name: permit firewalld
+  firewalld:
+          port: "{{ http_port }}/tcp"
+          state: enabled
+          permanent: yes
+          immediate: yes
+  ignore_errors: yes
+  
